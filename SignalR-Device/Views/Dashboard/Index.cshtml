@@ -8,8 +8,8 @@
 <h2>SignalR Device Demo Dashboard</h2>
 
 <div style="text-align: center; margin: 20px">
-        <button id="sendNormalMessage" class="btn btn-primary">Normal <span id="normalDeviceCount" class="badge">0</span></button>
-        <button id="sendRetinaMessage" class="btn btn-primary">Retina <span id="retinaDeviceCount" class="badge">0</span></button>
+        <button id="sendNormalMessage" class="btn btn-primary">Normal Pixel Ratio <span id="normalDeviceCount" class="badge">0</span></button>
+        <button id="sendRetinaMessage" class="btn btn-primary">High Pixel Ratio <span id="retinaDeviceCount" class="badge">0</span></button>
 </div>
 
 
@@ -19,7 +19,7 @@
         <th>IP Address</th>
         <th>Device Width</th>
         <th>Device Height</th>
-        <th>Aspect Ratio</th>
+        <th>Pixel Ratio</th>
     </tr>
     <tbody>
 
@@ -160,7 +160,7 @@
             });
             
             function appendRow(device) {
-                var row = $('<tr id="' + device.Id + '"><td>' + device.Id + '</td><td>' + device.IpAddress + '</td><td>' + device.Width + '</td><td>' + device.Height + '</td><td>' + device.AspectRatio + '</td></tr>');
+                var row = $('<tr id="' + device.Id + '"><td>' + device.Id + '</td><td>' + device.IpAddress + '</td><td>' + device.Width + '</td><td>' + device.Height + '</td><td>' + device.PixelRatio + '</td></tr>');
                 $('table > tbody:last').append(row);
             }
         });

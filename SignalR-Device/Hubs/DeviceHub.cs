@@ -13,7 +13,7 @@ namespace SignalR_Demo.Hubs
         public static readonly List<Device> _devices;
 
         public const string NormalDevice = "NormalDevice";
-        public const string RetinaDevice = "RetinaDevice";
+        public const string ExtraPixelRatioDevice = "ExtraPixelRatioDevice";
         public const string DashboardGroup = "DashboardGroup";
 
         static DeviceHub()
@@ -28,7 +28,7 @@ namespace SignalR_Demo.Hubs
                 {
                     Height = deviceHeight,
                     Width = deviceWidth,
-                    AspectRatio = aspectRatio,
+                    PixelRatio = aspectRatio,
                     IpAddress = ip,
                     Id = new Guid(Context.ConnectionId)
                 };
@@ -36,16 +36,15 @@ namespace SignalR_Demo.Hubs
 
             if (aspectRatio > 1)
             {
-                Groups.Add(Context.ConnectionId, RetinaDevice);
-                Clients.Group(DashboardGroup).sendRetinaDeviceCount(_devices.Count(x => x.AspectRatio > 1));
+                Groups.Add(Context.ConnectionId, ExtraPixelRatioDevice);
+                Clients.Group(DashboardGroup).sendRetinaDeviceCount(_devices.Count(x => x.PixelRatio > 1));
             }
             else
             {
                 Groups.Add(Context.ConnectionId, NormalDevice);
-                Clients.Group(DashboardGroup).sendNormalDeviceCount(_devices.Count(x => x.AspectRatio == 1));
+                Clients.Group(DashboardGroup).sendNormalDeviceCount(_devices.Count(x => x.PixelRatio == 1));
             }
 
-            // Call the addNewMessageToPage method to update clients.
             Clients.Group(DashboardGroup).userConnected(device);
             Clients.All.sendNumberOfDevices(_devices.Count);
         }
@@ -54,8 +53,8 @@ namespace SignalR_Demo.Hubs
         {
             Groups.Add(Context.ConnectionId, DashboardGroup);
             Clients.Caller.dashboardConnected(_devices);
-            Clients.Caller.sendNormalDeviceCount(_devices.Count(x => x.AspectRatio == 1));
-            Clients.Caller.sendRetinaDeviceCount(_devices.Count(x => x.AspectRatio > 1));
+            Clients.Caller.sendNormalDeviceCount(_devices.Count(x => x.PixelRatio == 1));
+            Clients.Caller.sendRetinaDeviceCount(_devices.Count(x => x.PixelRatio > 1));
         }
 
         public void SendMessage(Guid id, string message)
@@ -65,7 +64,7 @@ namespace SignalR_Demo.Hubs
 
         public void SendRetinaMessage(string message)
         {
-            Clients.Group(RetinaDevice).sendMessage(message);
+            Clients.Group(ExtraPixelRatioDevice).sendMessage(message);
         }
 
         public void SendNormalMessage(string message)
@@ -88,10 +87,10 @@ namespace SignalR_Demo.Hubs
 
         public override System.Threading.Tasks.Task OnDisconnected()
         {
-            //var cookie = Context.RequestCookies.FirstOrDefault();
-            //var id = new Guid(cookie.Value.Value);
             _devices.Remove(_devices.FirstOrDefault(x => x.Id == new Guid(Context.ConnectionId)));
             Clients.All.sendNumberOfDevices(_devices.Count);
+            Clients.Group(DashboardGroup).sendNormalDeviceCount(_devices.Count(x => x.PixelRatio == 1));
+            Clients.Group(DashboardGroup).sendRetinaDeviceCount(_devices.Count(x => x.PixelRatio > 1));
             return base.OnDisconnected();
         }
     }
