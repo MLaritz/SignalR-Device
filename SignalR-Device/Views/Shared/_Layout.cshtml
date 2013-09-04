@@ -1,0 +1,21 @@
+﻿@using System.Web.Optimization
+<html>
+    <head>
+        <title>@ViewBag.Title</title>
+        <meta name="viewport" content="width=device-width"/>
+        @Styles.Render("~/Content/bootstrapcss")
+        @Scripts.Render("~/bundles/jquery")
+    </head>
+    <body>
+        <div id="wrap">
+            <div id="main">
+                @RenderBody()
+            </div>
+        </div>
+        <footer>
+            &copy; @DateTime.Now.Year - Developed by <a href="http://www.martinlaritz.com">Martin Laritz</a>
+        </footer>
+        @Scripts.Render("~/bundles/bootstrap")
+        @RenderSection("scripts", false)
+    </body>
+</html>

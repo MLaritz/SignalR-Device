@@ -1,0 +1,44 @@
+﻿@using System.Web.Optimization
+
+@{
+    ViewBag.Title = "SignalR Device Demo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>SignalR Device Demo</h2>
+<div style="text-align: center">
+    <button type="button" class="btn btn-primary" id="connect">Connect to SignalR Server</button>
+</div>
+
+<div id="connections"><span id="connectionNumber"></span> devices connected.</div>
+
+<h4>Message</h4>
+<div id="message" style="margin-top: 20px">You currently have not received a message from the server.</div>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/signalr")
+    <script type="text/javascript" src="~/signalr/hubs"></script>
+    <script type="text/javascript">
+        $(function () {
+            var deviceHub = $.connection.deviceHub;
+
+            deviceHub.client.sendNumberOfDevices = function (count) {
+                // Add the message to the page. 
+                $('#connectionNumber').text(count);
+            };
+
+            deviceHub.client.sendMessage = function(message) {
+                $('#message').html(message);
+            };
+
+            $.connection.hub.start().done(function () {
+                $('#connect').click(function () {
+                    deviceHub.server.send(screen.width, screen.height, window.devicePixelRatio);
+                    $('#connect').hide();
+                });
+            });
+
+        });
+    </script>
+}

@@ -1,0 +1,168 @@
+﻿@using System.Web.Optimization
+
+@{
+    ViewBag.Title = "SignalR Device Demo Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>SignalR Device Demo Dashboard</h2>
+
+<div style="text-align: center; margin: 20px">
+        <button id="sendNormalMessage" class="btn btn-primary">Normal <span id="normalDeviceCount" class="badge">0</span></button>
+        <button id="sendRetinaMessage" class="btn btn-primary">Retina <span id="retinaDeviceCount" class="badge">0</span></button>
+</div>
+
+
+<table class="table">
+    <tr>
+        <th>Id</th>
+        <th>IP Address</th>
+        <th>Device Width</th>
+        <th>Device Height</th>
+        <th>Aspect Ratio</th>
+    </tr>
+    <tbody>
+
+    </tbody>
+</table>
+
+<div id="modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Send Message</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea class="form-control" id="message"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="sendMessage" class="btn btn-primary">Send Message</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="normalDeviceModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Send Message to Normal Devices</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea class="form-control" id="normalMessage"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="btnSendNormalMessage" class="btn btn-primary">Send Message</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="retinaDeviceModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Send Message to Retina Devices</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea class="form-control" id="retinaMessage"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="btnSendRetinaMessage" class="btn btn-primary">Send Message</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/signalr")
+    <script type="text/javascript" src="~/signalr/hubs"></script>
+    <script type="text/javascript">
+        $(function () {
+            var deviceHub = $.connection.deviceHub;
+            var id;
+            
+            deviceHub.client.sendNormalDeviceCount = function (count) {
+                $('#normalDeviceCount').text(count);
+            };
+            
+            deviceHub.client.sendRetinaDeviceCount = function (count) {
+                $('#retinaDeviceCount').text(count);
+            };
+
+            deviceHub.client.userConnected = function(device) {
+                appendRow(device);
+            };
+
+            deviceHub.client.userDisconnected = function(id) {
+                $('tr[id="' + id + '"]').remove();
+            };
+            
+            deviceHub.client.dashboardConnected = function (devices) {
+                for (var i = 0; i < devices.length; i++) {
+                    appendRow(devices[i]);
+                }
+            };
+            
+            $('tbody').on('click', 'tr', function () {
+                id = $(this).find('td:first').html();
+                $('#modal').modal();
+            });
+
+            $('#sendNormalMessage').click(function() {
+                $('#normalDeviceModal').modal();
+            });
+
+            $('#sendRetinaMessage').click(function() {
+                $('#retinaDeviceModal').modal();
+            });
+
+            $('#sendMessage').click(function() {
+                deviceHub.server.sendMessage(id, $('#message').val());
+                $('#modal').modal('hide');
+            });
+
+            $('#btnSendNormalMessage').click(function() {
+                deviceHub.server.sendNormalMessage($('#normalMessage').val());
+                $('#normalDeviceModal').modal('hide');
+            });
+
+            $('#btnSendRetinaMessage').click(function() {
+                deviceHub.server.sendRetinaMessage($('#retinaMessage').val());
+                $('#retinaDeviceModal').modal('hide');
+            });
+
+            $.connection.hub.start().done(function () {
+                deviceHub.server.dashboardConnected();
+            });
+            
+            function appendRow(device) {
+                var row = $('<tr id="' + device.Id + '"><td>' + device.Id + '</td><td>' + device.IpAddress + '</td><td>' + device.Width + '</td><td>' + device.Height + '</td><td>' + device.AspectRatio + '</td></tr>');
+                $('table > tbody:last').append(row);
+            }
+        });
+    </script>
+}
